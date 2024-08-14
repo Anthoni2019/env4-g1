@@ -9,8 +9,8 @@ const getAllF = catchError(async(req, res) => {
 const createF = catchError(async(req, res) => {
     const Id = parseInt(req.params.id)
     const idBody = req.body[0]
-    console.log('objeto body', idBody)
-    console.log('usuario logeado', req.user.id)
+    const isValid = await Favorite.findOne({where:{postId:req.body[0]}})
+    if(!isValid) {
      if(Id === req.user.id)  newObject = {
          userId : req.user.id,
          postId : req.body[0]
@@ -18,6 +18,8 @@ const createF = catchError(async(req, res) => {
 
      const result = await Favorite.create(newObject);
     return res.status(201).json(result);
+    }
+    return res.status(404).json({message: 'el post ya se encuentra en tus favorites'})
 });
 
 const getOne = catchError(async(req, res) => {
