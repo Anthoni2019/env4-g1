@@ -2,24 +2,30 @@ const catchError = require('../utils/catchError');
 const Favorite = require('../models/Favorite');
 
 const getAllF = catchError(async(req, res) => {
-    const results = await Favorite.findAll();
+    console.log(req.user.id)
+    const results = await Favorite.findAll({where:  {userId: req.user.id}});
     return res.json(results);
 });
 
 const createF = catchError(async(req, res) => {
     const Id = parseInt(req.params.id)
-    const idBody = req.body[0]
-    const isValid = await Favorite.findOne({where:{postId:req.body[0]}})
-    if(!isValid) {
-     if(Id === req.user.id)  newObject = {
-         userId : req.user.id,
-         postId : req.body[0]
-     } 
-
-     const result = await Favorite.create(newObject);
-    return res.status(201).json(result);
+    const isValid = await Favorite.findOne({where:{
+            postId:req.body[0], 
+            userId: req.user.id
+        }});
+     console.log('la validación es: ', isValid)
+     if(Id === req.user.id) { 
+         if(!isValid) {
+            newObject = {
+                userId : req.user.id,
+                postId : req.body[0]
+            } 
+    const result = await Favorite.create(newObject);
+        return res.status(201).json(result);
+    } else return res.status(404).json({msg: 'the post is already in your favorites'})
+     
     }
-    return res.status(404).json({message: 'el post ya se encuentra en tus favorites'})
+    return res.status(404).json({message: 'no match'})
 });
 
 const getOne = catchError(async(req, res) => {
